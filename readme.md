@@ -74,8 +74,8 @@ print_r($results); // contains array of returned rows
 This method allows you to specify the parameters of the query.
 
 ```php
-$db->where('id', int);
-$db->where('title', string);
+$db->where('id', int,'OR');
+$db->where('title', string,'OR');
 $results = $db->get('tableName');
 print_r($results); // contains array of returned rows
 ```
@@ -84,7 +84,7 @@ Optionally you can use method chaining to call where multiple times without refe
 
 ```php
 $results = $db
-	->where('id', 1)
-	->where('title', 'MyTitle')
+	->where('id', 1,'OR')
+	->where('title', 'MyTitle','OR')
 	->get('tableName');
 ```

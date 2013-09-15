@@ -37,6 +37,12 @@ class MysqliDb
      */
     protected $_where = array();
     /**
+     * An array that holds where conditions types OR / AND'fieldname' => 'condition'
+     *
+     * @var array
+     */
+    protected $_whereCondition = array();
+    /**
      * Dynamic type list for where condition values
      *
      * @var array
@@ -233,8 +239,9 @@ class MysqliDb
      *
      * @return MysqliDb
      */
-    public function where($whereProp, $whereValue)
+    public function where($whereProp, $whereValue,$condition)
     {
+    	$this->_whereCondition[$whereProp]=$condition;
         $this->_where[$whereProp] = $whereValue;
         return $this;
     }
@@ -311,7 +318,7 @@ class MysqliDb
         $hasConditional = !empty($this->_where);
 
         // Did the user call the "where" method?
-        if (!empty($this->_where)) {
+        if (!empty($this->_where)) { 
 
             // if update data was passed, filter through and create the SQL query, accordingly.
             if ($hasTableData) {
@@ -333,11 +340,13 @@ class MysqliDb
             foreach ($this->_where as $column => $value) {
                 // Determines what data type the where column is, for binding purposes.
                 $this->_whereTypeList .= $this->_determineType($value);
-
+				
+				$condition = $this->_whereCondition[$column];
+				
                 // Prepares the reset of the SQL query.
-                $this->_query .= ($column . ' = ? AND ');
+                $this->_query .= ($column . " = ? $condition ");
             }
-            $this->_query = rtrim($this->_query, ' AND ');
+            $this->_query = rtrim($this->_query, " $condition ");
         }
 
         // Determine if is INSERT query
