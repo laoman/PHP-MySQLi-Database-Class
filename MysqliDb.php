@@ -42,6 +42,11 @@ class MysqliDb
      * @var array
      */
     protected $_whereCondition = array();
+    /**Boolean that declares whether the where condition should be case sensitive or not
+     *
+     * @var boolean
+     */
+    protected $_isCaseSensitive;
     /**
      * Dynamic type list for where condition values
      *
@@ -239,14 +244,21 @@ class MysqliDb
      *
      * @return MysqliDb
      */
-    public function where($whereProp, $whereValue,$condition)
+    public function where($whereProp, $whereValue,$condition = null)
     {
     	$this->_whereCondition[$whereProp]=$condition;
         $this->_where[$whereProp] = $whereValue;
         return $this;
     }
 
-
+    /**
+     * Wrapper function to make the where queries case sensitive or othwerwise
+     */
+    public function isCaseSensitive($case)
+    {
+    	$this->_isCaseSensitive = $case;
+    }
+    
     /**
      * This methods returns the ID of the last inserted item
      *
@@ -339,14 +351,14 @@ class MysqliDb
             $this->_query .= ' WHERE ';
             foreach ($this->_where as $column => $value) {
                 // Determines what data type the where column is, for binding purposes.
-                $this->_whereTypeList .= $this->_determineType($value);
+				$this->_whereTypeList .= $this->_determineType( $this->_isCaseSensitive ? $value : strtolower($value) );
 				
 				$condition = $this->_whereCondition[$column];
-				
                 // Prepares the reset of the SQL query.
-                $this->_query .= ($column . " = ? $condition ");
+                $this->_query .= $this->_isCaseSensitive ? ($column. " = ? $condition ") :('lower('.$column. ')' . " = ? $condition ");
             }
             $this->_query = rtrim($this->_query, " $condition ");
+            echo $this->_query . '   -> '.			$this->_isCaseSensitive;
         }
 
         // Determine if is INSERT query
